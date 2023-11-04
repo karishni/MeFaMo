@@ -15,6 +15,8 @@ from pylivelinkface import PyLiveLinkFace, FaceBlendShape
 from mefamo.utils.drawing import Drawing
 from mefamo.blendshapes.blendshape_calculator import BlendshapeCalculator
 
+import csv
+
 # taken from: https://github.com/Rassibassi/mediapipeDemos
 from mefamo.custom.face_geometry import (  # isort:skip
     PCF,
@@ -90,6 +92,14 @@ class Mefamo():
         
         self.image_height, self.image_width, channels = (480, 640, 3)
 
+        self.csv_file = os.path.join('data','mefamo_test.csv')
+        with open(self.csv_file, 'w') as f:
+            writer = csv.writer(f)
+            header = 'Blendshapes'
+            for bs in FaceBlendShape:
+                header += ',' + bs.name
+            writer.writerow(header)
+
         # pseudo camera internals
         focal_length = self.image_width
         center = (self.image_width / 2, self.image_height / 2)
@@ -149,7 +159,7 @@ class Mefamo():
                     continue
                 if not self._process_image(image):
                     break    
-            print("Video capture received no more frames.")                
+            print("Video capture received no more frames.")            
             cap.release()
         
         else:
@@ -257,6 +267,16 @@ class Mefamo():
 
         with self.lock:
             self.got_new_data = True
+            print('hi')
+            self._to_csv()
             self.network_data = self.live_link_face.encode()
 
         return True
+
+    def _to_csv(self):
+        with open(self.csv_file, 'w') as f:
+            writer = csv.writer(f)
+            row = str(time.time())
+            for bs in FaceBlendShape:
+                row += ',' + self.live_link_face.get_blendshape(bs.value)
+            writer.writerow(row)

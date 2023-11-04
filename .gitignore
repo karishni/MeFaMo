@@ -53,3 +53,4 @@ dist/**
 /mefamo/build/mefamo
 /mefamo/dist
 /examples/*.spec
+meng-proj-emv/
